@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en_US">
+<head>
+    <title>Courier Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        h1 {
+            height: 40px;
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            height: calc(100vh - 70px);
+            width: 100%;
+            min-height: 700px;
+        }
+    </style>
+</head>
+<body>
+<h1>Courier Map <small style="font-weight: 400">gets updated every 3 seconds</small></h1>
+<div id="map"></div>
+<script>
+    // init map
+    const map = L.map('map').setView([48.1351, 11.5820], 16);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+    }).addTo(map);
+
+    const markers = {};
+    async function fetchCourierLocations() {
+        const response = await fetch('/api/couriers/locations');
+        const couriers = await response.json();
+
+        couriers.forEach(courier => {
+            const {name, latitude, longitude} = courier;
+
+            if (!markers[name]) {
+                markers[name] = L.marker([latitude, longitude])
+                    .bindPopup(name)
+                    .bindTooltip(name, { permanent: true, direction: 'top' })
+                    .addTo(map);
+            } else {
+                markers[name].setLatLng([latitude, longitude]);
+            }
+        });
+    }
+    setInterval(fetchCourierLocations, 3000);
+    fetchCourierLocations();
+</script>
+</body>
+</html>
