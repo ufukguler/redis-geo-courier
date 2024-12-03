@@ -1,0 +1,26 @@
+version: '3.9'
+
+networks:
+  courier:
+    name: courier
+
+services:
+
+  courier-service:
+    container_name: courier-service
+    ports:
+      - '8080:8080'
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    networks:
+      - courier
+  courier-redis:
+    image: redis:7.0
+    container_name: courier-redis
+    ports:
+      - "6379:6379"
+    command: [ "redis-server", "--appendonly", "yes" ] # enable persistence
+    platform: linux/arm64
+    networks:
+      - courier
